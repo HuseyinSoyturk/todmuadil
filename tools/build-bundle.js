@@ -13,13 +13,13 @@ const cssText = fs.readFileSync(cssPath, 'utf8');
 await build({
   entryPoints: [path.join(rootDir, 'src/index.js')],
   bundle: true,
+  minify: true,
   format: 'iife',
   target: ['es2020'],
   outfile: outFile,
   banner: {
-    js: `globalThis.__TOD_XBOX_INLINE_CSS__ = ${JSON.stringify(cssText)};`
+    js: `globalThis.__TOD_XBOX_INLINE_CSS__=${JSON.stringify(cssText)};`
   }
 });
 
 console.log(`Built bundle: ${outFile}`);
-

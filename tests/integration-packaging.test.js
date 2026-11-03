@@ -36,5 +36,21 @@ describe('Xbox UWP & Preview Server artifacts', () => {
     expect(appCode).toContain('https://www.todtv.com.tr/canli-tv/bein-sports-1?c=spor');
     expect(appCode).toContain('Page.addScriptToEvaluateOnNewDocument');
   });
+
+  it('serves a sleek Xbox Edge bridge page on / with self-contained inline HTTPS-safe bookmarklet code and direct TOD link', async () => {
+    const { createPreviewServer } = await import('../tools/dev-preview-server.js');
+    const server = createPreviewServer();
+    await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+    const { port } = server.address();
+    try {
+      const res = await fetch(`http://127.0.0.1:${port}/`);
+      const html = await res.text();
+      expect(html).toContain('id="copy-bookmarklet-btn"');
+      expect(html).toContain('https://www.todtv.com.tr/canli-tv/bein-sports-1?c=spor');
+      expect(html).toContain('INLINE_BOOKMARKLET_CODE');
+    } finally {
+      server.close();
+    }
+  });
 });
 

@@ -5,6 +5,7 @@ import path from 'node:path';
 
 const rootDir = path.resolve(import.meta.dirname, '..');
 const bundlePath = path.join(rootDir, 'dist/tod-xbox-live.bundle.js');
+const TOD_LIVE_URL = 'https://www.todtv.com.tr/canli-tv/bein-sports-1?c=spor';
 
 function getLocalIp() {
   const nets = os.networkInterfaces();
@@ -29,264 +30,163 @@ export function createPreviewServer() {
       return;
     }
 
-    const host = req.headers.host || `${getLocalIp()}:4173`;
-    const bookmarkletCode = `javascript:(function(){var s=document.createElement('script');s.src='http://${host}/tod-xbox-live.bundle.js?t='+Date.now();document.body.appendChild(s);})();`;
+    const bundleJs = fs.readFileSync(bundlePath, 'utf8').trim();
+    const inlineBookmarklet = `javascript:${encodeURI(`(function(){${bundleJs}})();`)}`;
 
     const html = `<!DOCTYPE html>
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <title>TOD Xbox 65" Canlı Yayın & Giriş Test Ekranı</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TOD Xbox • Kurulum Köprüsü</title>
   <style>
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      background: #0c1017;
-      color: #f3f4f6;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      padding: 32px 48px 110px;
-    }
-    header {
+      min-height: 100vh;
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      margin-bottom: 28px;
-      border-bottom: 1px solid #1f2937;
-      padding-bottom: 18px;
-    }
-    .logo {
-      font-size: 36px;
-      font-weight: 900;
-      color: #00e676;
-      letter-spacing: 2px;
-    }
-    .status-badge {
-      background: #1f2937;
-      padding: 10px 18px;
-      border-radius: 10px;
-      font-size: 18px;
-      color: #9ca3af;
-    }
-    .layout {
-      display: grid;
-      grid-template-columns: 420px 1fr;
-      gap: 32px;
-      align-items: start;
-    }
-    .card {
-      background: #141b26;
-      border: 1px solid #263244;
-      border-radius: 16px;
+      justify-content: center;
+      background: radial-gradient(circle at 50% 0%, #1e293b 0%, #090d16 70%);
+      color: #f8fafc;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       padding: 24px;
     }
-    h2 {
-      margin-top: 0;
+    .bridge-card {
+      width: 100%;
+      max-width: 680px;
+      background: rgba(15, 23, 42, 0.78);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 20px;
+      padding: 32px 36px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+    }
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #34d399;
+      background: rgba(16, 185, 129, 0.14);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 4px 10px;
+      border-radius: 999px;
+      margin-bottom: 12px;
+    }
+    h1 {
+      margin: 0 0 8px;
       font-size: 24px;
-      color: #fff;
-    }
-    .form-group {
-      margin-bottom: 16px;
-    }
-    input[type="text"], input[type="password"] {
-      width: 100%;
-      padding: 16px;
-      font-size: 20px;
-      border-radius: 10px;
-      border: 2px solid #374151;
-      background: #0b0f17;
-      color: #fff;
-    }
-    button.primary-btn {
-      width: 100%;
-      padding: 16px;
-      font-size: 22px;
       font-weight: 700;
-      border-radius: 10px;
-      border: none;
-      background: #00e676;
-      color: #06130c;
-      cursor: pointer;
+      letter-spacing: -0.3px;
     }
-    .channel-list {
+    p.sub {
+      margin: 0 0 24px;
+      font-size: 14px;
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+    .actions {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
-      margin-bottom: 24px;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 22px;
     }
-    .live-channel-item {
+    .btn {
+      appearance: none;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      padding: 14px 18px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      transition: all 0.15s ease;
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      padding: 20px 24px;
-      background: #1e293b;
-      border-radius: 12px;
-      color: #fff;
-      text-decoration: none;
-      font-size: 22px;
-      font-weight: 700;
-      border: 2px solid transparent;
+      justify-content: center;
+      gap: 8px;
     }
-    .live-channel-item.active {
-      background: #064e3b;
-      border-color: #10b981;
+    .btn-primary {
+      background: #10b981;
+      color: #042f2e;
+      border-color: #34d399;
     }
-    .live-tag {
-      background: #ef4444;
-      color: #fff;
-      font-size: 14px;
-      padding: 4px 10px;
-      border-radius: 6px;
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.07);
+      color: #f8fafc;
     }
-    .player-container {
-      background: #000;
-      border-radius: 16px;
-      overflow: hidden;
-      position: relative;
-      border: 2px solid #1f2937;
+    .steps {
+      background: rgba(9, 13, 22, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 14px;
+      padding: 16px 20px;
+      font-size: 13px;
+      color: #cbd5e1;
+      line-height: 1.65;
     }
-    video {
-      width: 100%;
-      height: 430px;
-      display: block;
-      background: #000;
+    .steps ol {
+      margin: 6px 0 0;
+      padding-left: 18px;
     }
-    .channel-overlay {
-      position: absolute;
-      top: 20px;
-      left: 24px;
-      background: rgba(0,0,0,0.75);
-      padding: 10px 18px;
-      border-radius: 8px;
-      font-size: 22px;
-      font-weight: 700;
-      color: #00e676;
-      pointer-events: none;
+    .status {
+      margin-top: 12px;
+      font-size: 13px;
+      color: #34d399;
+      min-height: 20px;
     }
-    .bookmarklet-box {
-      margin-top: 24px;
-      padding-top: 18px;
-      border-top: 1px solid #263244;
-      font-size: 16px;
-      color: #9ca3af;
-    }
-    .bookmarklet-link {
-      display: inline-block;
-      margin-top: 8px;
-      padding: 10px 16px;
-      background: #2563eb;
-      color: #fff;
-      border-radius: 8px;
-      text-decoration: none;
-      font-weight: 700;
-    }
-    .hidden { display: none !important; }
   </style>
 </head>
 <body>
-  <header>
-    <div class="logo">TOD XBOX • 65" CANLI YAYIN</div>
-    <div id="session-status" class="status-badge">Oturum: Giriş Bekleniyor</div>
-  </header>
+  <div class="bridge-card">
+    <div class="badge">Xbox Edge • Yol 1</div>
+    <h1>TOD Canlı TV & Kol Kontrol Köprüsü</h1>
+    <p class="sub">Xbox Edge tarayıcısında gerçek <b>todtv.com.tr</b> üzerinde kol kontrollerini ve hızlı kanal barını çalıştırmak için:</p>
 
-  <div class="layout">
-    <div class="card">
-      <div id="login-panel">
-        <h2>1. Adım: TOD Hesap Girişi</h2>
-        <form id="login-form">
-          <div class="form-group">
-            <input id="username" type="text" placeholder="E-posta veya Cep Telefonu" value="5551234567" />
-          </div>
-          <div class="form-group">
-            <input id="password" type="password" placeholder="Şifre" value="••••••••" />
-          </div>
-          <button id="submit-btn" class="primary-btn" type="submit">Giriş Yap</button>
-        </form>
-      </div>
-
-      <div id="logged-in-panel" class="hidden">
-        <h2>Oturum Açık (Kalıcı Çerez Aktif)</h2>
-        <p style="font-size:18px;color:#cbd5e1;">Artık doğrudan sağdaki Canlı Kanallar arasında kolun <b>Yön Tuşları (D-Pad)</b> ile gezinebilir ve <b>X (veya F)</b> tuşuyla 65 inç Tam Ekran yapabilirsiniz.</p>
-        <button id="logout-btn" class="primary-btn" style="background:#ef4444;color:#fff;margin-top:12px;">Çıkış Yap (Girişi Sıfırla)</button>
-      </div>
-
-      <div class="bookmarklet-box">
-        <div><b>Xbox Edge Hızlı Kısayol:</b></div>
-        <a class="bookmarklet-link" href="${bookmarkletCode}">🎮 TOD Xbox TV Modu</a>
-      </div>
+    <div class="actions">
+      <button id="copy-bookmarklet-btn" class="btn btn-primary" type="button">
+        1. TV Modu Kodunu Kopyala
+      </button>
+      <a id="open-tod-btn" class="btn btn-secondary" href="${TOD_LIVE_URL}">
+        2. Gerçek TOD Canlı TV'yi Aç →
+      </a>
     </div>
 
-    <div class="card">
-      <h2>2. Adım: Canlı TV Kanalları (Süper Lig)</h2>
-      <div class="channel-list">
-        <a id="ch-bein1" class="live-channel-item active" href="#bein-sports-1" data-title="beIN SPORTS 1 HD — Süper Lig Canlı">
-          <span>beIN SPORTS 1</span><span class="live-tag">CANLI</span>
-        </a>
-        <a id="ch-bein2" class="live-channel-item" href="#bein-sports-2" data-title="beIN SPORTS 2 HD — Premier League">
-          <span>beIN SPORTS 2</span><span class="live-tag">CANLI</span>
-        </a>
-        <a id="ch-bein3" class="live-channel-item" href="#bein-sports-3" data-title="beIN SPORTS 3 HD — Bundesliga">
-          <span>beIN SPORTS 3</span><span class="live-tag">CANLI</span>
-        </a>
-        <a id="ch-bein4" class="live-channel-item" href="#bein-sports-4" data-title="beIN SPORTS HABER HD">
-          <span>beIN SPORTS HABER</span><span class="live-tag">CANLI</span>
-        </a>
-      </div>
-
-      <div id="player-wrapper" class="player-container">
-        <div id="channel-banner" class="channel-overlay">beIN SPORTS 1 HD — Süper Lig Canlı</div>
-        <video id="live-video" controls autoplay loop muted playsinline
-          src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4"></video>
-      </div>
+    <div class="steps">
+      <b>Xbox Edge'de Kalıcı Favori (Yer İmi) Yapma (Sadece 1 Kez):</b>
+      <ol>
+        <li>Yukarıdaki <b>"1. TV Modu Kodunu Kopyala"</b> butonuna kolun <b>A</b> tuşuyla basın.</li>
+        <li>Xbox Edge adres çubuğunun yanındaki <b>☆ (Favorilere Ekle)</b> ikonuna basıp bu sayfayı kaydedin, ardından Favoriler listesinden <b>Düzenle (URL)</b> kısmına kopyaladığınız kodu yapıştırın.</li>
+        <li><b>"2. Gerçek TOD Canlı TV'yi Aç"</b> butonuna basın; TOD açıldığında Favorilerden bu yer imine tıkladığınız an <b>Hızlı Kanal Barı (Y tuşu)</b> ve <b>Tam Ekran (X tuşu)</b> aktif olur.</li>
+      </ol>
     </div>
+
+    <div id="copy-status" class="status"></div>
   </div>
 
+  <textarea id="bookmarklet-raw" style="position:fixed;left:-9999px;top:-9999px;" readonly>${inlineBookmarklet}</textarea>
   <script>
-    const loginForm = document.getElementById('login-form');
-    const loginPanel = document.getElementById('login-panel');
-    const loggedInPanel = document.getElementById('logged-in-panel');
-    const sessionStatus = document.getElementById('session-status');
-    const logoutBtn = document.getElementById('logout-btn');
-    const banner = document.getElementById('channel-banner');
+    const INLINE_BOOKMARKLET_CODE = document.getElementById('bookmarklet-raw').value;
+    const copyBtn = document.getElementById('copy-bookmarklet-btn');
+    const statusEl = document.getElementById('copy-status');
 
-    function syncAuthUi() {
-      const loggedIn = localStorage.getItem('tod_xbox_demo_auth') === '1';
-      if (loggedIn) {
-        loginPanel.classList.add('hidden');
-        loggedInPanel.classList.remove('hidden');
-        sessionStatus.textContent = 'Oturum: Açık (Kalıcı)';
-        sessionStatus.style.color = '#00e676';
-      } else {
-        loginPanel.classList.remove('hidden');
-        loggedInPanel.classList.add('hidden');
-        sessionStatus.textContent = 'Oturum: Giriş Bekleniyor';
-        sessionStatus.style.color = '#9ca3af';
+    copyBtn.addEventListener('click', async () => {
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(INLINE_BOOKMARKLET_CODE);
+        } else {
+          const raw = document.getElementById('bookmarklet-raw');
+          raw.select();
+          document.execCommand('copy');
+        }
+        statusEl.textContent = '✓ TV Modu kodu panoya kopyalandı! Şimdi Favori URL’sine yapıştırabilir veya 2. adıma geçebilirsiniz.';
+      } catch (err) {
+        statusEl.textContent = 'Kopyalama başarısız oldu: ' + err.message;
       }
-      if (window.__TOD_XBOX_LIVE_ACTIVE__) {
-        window.__TOD_XBOX_LIVE_ACTIVE__.nav.refresh();
-      }
-    }
-
-    loginForm.addEventListener('submit', e => {
-      e.preventDefault();
-      localStorage.setItem('tod_xbox_demo_auth', '1');
-      syncAuthUi();
     });
-
-    logoutBtn.addEventListener('click', () => {
-      localStorage.removeItem('tod_xbox_demo_auth');
-      syncAuthUi();
-    });
-
-    document.querySelectorAll('.live-channel-item').forEach(item => {
-      item.addEventListener('click', e => {
-        e.preventDefault();
-        document.querySelectorAll('.live-channel-item').forEach(el => el.classList.remove('active'));
-        item.classList.add('active');
-        banner.textContent = item.getAttribute('data-title');
-      });
-    });
-
-    syncAuthUi();
   </script>
   <script src="/tod-xbox-live.bundle.js"></script>
 </body>
@@ -301,9 +201,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const port = Number(process.env.PORT || 4173);
   const server = createPreviewServer();
   server.listen(port, '0.0.0.0', () => {
-    console.log(`TOD Xbox Test Server running at:`);
-    console.log(`  Local (Mac):  http://localhost:${port}`);
-    console.log(`  Xbox (LAN):   http://${getLocalIp()}:${port}`);
+    console.log(`TOD Xbox Köprü Sunucusu aktif:`);
+    console.log(`  Xbox Edge'den girin: http://${getLocalIp()}:${port}`);
   });
 }
-
