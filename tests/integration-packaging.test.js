@@ -30,5 +30,11 @@ describe('Xbox UWP & Preview Server artifacts', () => {
       server.close();
     }
   });
+
+  it('configures tod-desktop-app.js to launch real todtv.com.tr in app mode and inject the bundle via CDP', () => {
+    const appCode = fs.readFileSync(path.resolve('tools/tod-desktop-app.js'), 'utf8');
+    expect(appCode).toContain('https://www.todtv.com.tr/canli-tv/bein-sports-1?c=spor');
+    expect(appCode).toContain('Page.addScriptToEvaluateOnNewDocument');
+  });
 });
 

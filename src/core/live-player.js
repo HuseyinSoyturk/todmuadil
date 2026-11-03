@@ -1,9 +1,21 @@
+export const QUICK_CHANNELS = [
+  { id: 'tod-ch-matches', label: '⚽ Haftanın Maçları', url: 'https://www.todtv.com.tr/spor/haftanin-maclari' },
+  { id: 'tod-ch-bein1', label: '🔴 beIN SPORTS 1', url: 'https://www.todtv.com.tr/canli-tv/bein-sports-1?c=spor' },
+  { id: 'tod-ch-bein2', label: '🔴 beIN SPORTS 2', url: 'https://www.todtv.com.tr/canli-tv/bein-sports-2?c=spor' },
+  { id: 'tod-ch-bein3', label: '🔴 beIN SPORTS 3', url: 'https://www.todtv.com.tr/canli-tv/bein-sports-3?c=spor' },
+  { id: 'tod-ch-bein4', label: '🔴 beIN SPORTS 4', url: 'https://www.todtv.com.tr/canli-tv/bein-sports-4?c=spor' },
+  { id: 'tod-ch-beinmax1', label: '🔴 beIN MAX 1', url: 'https://www.todtv.com.tr/canli-tv/bein-sports-max-1?c=spor' },
+  { id: 'tod-ch-beinhaber', label: '📺 beIN HABER', url: 'https://www.todtv.com.tr/canli-tv/bein-sports-haber?c=spor' }
+];
+
 const CHANNEL_SELECTOR = [
   '.live-channel-item',
   '.channel-card',
   'a[href*="/canli-izle"]',
-  'a[href*="/canli-tv"]',
-  '[data-channel-id]'
+  'a[href*="/canli-tv/"]',
+  'a[href*="/mac-detay/"]',
+  '[data-channel-id]',
+  '.tod-xbox-dock-item'
 ].join(', ');
 
 const PLAYER_CONTAINER_SELECTOR = [
@@ -98,6 +110,12 @@ export function createLivePlayerController(doc = document) {
   function getChannelElements() {
     const win = doc.defaultView || window;
     return Array.from(doc.querySelectorAll(CHANNEL_SELECTOR)).filter(el => {
+      if (el.classList && el.classList.contains('tod-xbox-dock-item')) {
+        const dock = el.closest('#tod-xbox-channel-dock');
+        if (dock && !dock.classList.contains('tod-xbox-dock-open')) {
+          return false;
+        }
+      }
       let curr = el;
       while (curr && curr.nodeType === 1) {
         if (
@@ -118,7 +136,7 @@ export function createLivePlayerController(doc = document) {
   }
 
   function switchChannel(delta) {
-    const channels = getChannelElements();
+    const channels = getChannelElements().filter(el => !el.classList.contains('tod-xbox-dock-item'));
     if (channels.length === 0) return null;
 
     let currentIdx = channels.findIndex(
@@ -146,4 +164,3 @@ export function createLivePlayerController(doc = document) {
     ensureUnmutedPlaying
   };
 }
-

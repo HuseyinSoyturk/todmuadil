@@ -6,7 +6,7 @@
   "scripts": {
     "test": "vitest run",
     "build": "node tools/build-bundle.js",
-    "preview": "node tools/dev-preview-server.js"
+    "preview": "node tools/tod-desktop-app.js"
   },
   "devDependencies": {
     "esbuild": "^0.24.0",

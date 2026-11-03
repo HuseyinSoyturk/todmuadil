@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { createLivePlayerController } from '../src/core/live-player.js';
+import { createLivePlayerController, QUICK_CHANNELS } from '../src/core/live-player.js';
+import { initTodXboxLive } from '../src/index.js';
 
 describe('createLivePlayerController', () => {
   beforeEach(() => {
@@ -55,5 +56,19 @@ describe('createLivePlayerController', () => {
     const controller = createLivePlayerController(document);
     expect(controller.getChannelElements().map(e => e.id)).toEqual(['bein1', 'bein2']);
     expect(controller.switchChannel(1).id).toBe('bein2');
+  });
+
+  it('provides real TOD sports channels in QUICK_CHANNELS and toggles sleek channel dock on Y action', () => {
+    expect(QUICK_CHANNELS.some(c => c.url.includes('/canli-tv/bein-sports-1'))).toBe(true);
+    expect(QUICK_CHANNELS.some(c => c.url.includes('/spor/haftanin-maclari'))).toBe(true);
+
+    delete window.__TOD_XBOX_LIVE_ACTIVE__;
+    const app = initTodXboxLive(document);
+    const dock = document.getElementById('tod-xbox-channel-dock');
+    expect(dock).toBeTruthy();
+    expect(dock.classList.contains('tod-xbox-dock-open')).toBe(false);
+
+    app.nav.triggerAction('Y');
+    expect(dock.classList.contains('tod-xbox-dock-open')).toBe(true);
   });
 });

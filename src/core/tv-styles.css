@@ -1,15 +1,26 @@
-/* 65-inch 4K TV (10-foot UI) Styles for Xbox TOD App */
+/* Sleek Apple TV / Smart TV Style Overlay for Real todtv.com.tr */
 
-.tod-xbox-focus {
-  outline: 4px solid #00e676 !important;
-  outline-offset: 3px !important;
-  box-shadow: 0 0 24px rgba(0, 230, 118, 0.75) !important;
-  transform: scale(1.04) !important;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, outline 0.15s ease !important;
-  z-index: 9999 !important;
-  position: relative;
+/* Hide TOD web clutter (chat bubble, cookie banner, footer badges) */
+#digito-chat,
+#bc-btn-digito-chat,
+#bc-btn-digito-chat-maximize,
+#app_cookieconsent,
+#ETBIS,
+.etbis {
+  display: none !important;
 }
 
+/* Subtle, modern focus halo */
+.tod-xbox-focus {
+  outline: 2px solid rgba(255, 255, 255, 0.95) !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.38), 0 6px 18px rgba(0, 0, 0, 0.45) !important;
+  transition: outline 0.12s ease, box-shadow 0.12s ease !important;
+  position: relative;
+  z-index: 9999 !important;
+}
+
+/* Guaranteed 100vw x 100vh Fullscreen Player Mode */
 .tod-xbox-forced-fullscreen {
   position: fixed !important;
   inset: 0 !important;
@@ -19,7 +30,7 @@
   height: 100vh !important;
   max-width: 100vw !important;
   max-height: 100vh !important;
-  z-index: 999999 !important;
+  z-index: 999998 !important;
   background: #000 !important;
 }
 
@@ -30,28 +41,82 @@
   background: #000 !important;
 }
 
+/* Glassmorphic Top Quick-Channel Dock */
+#tod-xbox-channel-dock {
+  position: fixed;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-140%);
+  opacity: 0;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: rgba(15, 23, 42, 0.84);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
+  z-index: 1000001;
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+  max-width: 96vw;
+  overflow-x: auto;
+}
+
+#tod-xbox-channel-dock.tod-xbox-dock-open {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.tod-xbox-dock-item {
+  appearance: none;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.06);
+  color: #f1f5f9;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 13px;
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.tod-xbox-dock-item:hover,
+.tod-xbox-dock-item.active {
+  background: rgba(16, 185, 129, 0.25);
+  border-color: rgba(16, 185, 129, 0.6);
+  color: #ffffff;
+}
+
+/* Subtle bottom-right mini controller pill */
 #tod-xbox-hud {
   position: fixed;
-  bottom: 28px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(12, 16, 23, 0.88);
-  color: #ffffff;
-  border: 2px solid rgba(0, 230, 118, 0.65);
-  border-radius: 14px;
-  padding: 14px 28px;
+  bottom: 16px;
+  right: 18px;
+  background: rgba(15, 23, 42, 0.76);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: rgba(241, 245, 249, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  padding: 6px 14px;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  font-size: 22px;
-  font-weight: 600;
-  letter-spacing: 0.4px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
   z-index: 1000000;
   pointer-events: none;
-  transition: opacity 0.35s ease;
+  transition: opacity 0.3s ease;
   white-space: nowrap;
 }
 
 #tod-xbox-hud.tod-xbox-hud-hidden {
   opacity: 0;
 }
-

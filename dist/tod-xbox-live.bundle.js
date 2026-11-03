@@ -1,4 +1,4 @@
-globalThis.__TOD_XBOX_INLINE_CSS__ = "/* 65-inch 4K TV (10-foot UI) Styles for Xbox TOD App */\n\n.tod-xbox-focus {\n  outline: 4px solid #00e676 !important;\n  outline-offset: 3px !important;\n  box-shadow: 0 0 24px rgba(0, 230, 118, 0.75) !important;\n  transform: scale(1.04) !important;\n  transition: transform 0.15s ease, box-shadow 0.15s ease, outline 0.15s ease !important;\n  z-index: 9999 !important;\n  position: relative;\n}\n\n.tod-xbox-forced-fullscreen {\n  position: fixed !important;\n  inset: 0 !important;\n  top: 0 !important;\n  left: 0 !important;\n  width: 100vw !important;\n  height: 100vh !important;\n  max-width: 100vw !important;\n  max-height: 100vh !important;\n  z-index: 999999 !important;\n  background: #000 !important;\n}\n\n.tod-xbox-forced-fullscreen video {\n  width: 100vw !important;\n  height: 100vh !important;\n  object-fit: contain !important;\n  background: #000 !important;\n}\n\n#tod-xbox-hud {\n  position: fixed;\n  bottom: 28px;\n  left: 50%;\n  transform: translateX(-50%);\n  background: rgba(12, 16, 23, 0.88);\n  color: #ffffff;\n  border: 2px solid rgba(0, 230, 118, 0.65);\n  border-radius: 14px;\n  padding: 14px 28px;\n  font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif;\n  font-size: 22px;\n  font-weight: 600;\n  letter-spacing: 0.4px;\n  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7);\n  z-index: 1000000;\n  pointer-events: none;\n  transition: opacity 0.35s ease;\n  white-space: nowrap;\n}\n\n#tod-xbox-hud.tod-xbox-hud-hidden {\n  opacity: 0;\n}\n\n";
+globalThis.__TOD_XBOX_INLINE_CSS__ = "/* Sleek Apple TV / Smart TV Style Overlay for Real todtv.com.tr */\n\n/* Hide TOD web clutter (chat bubble, cookie banner, footer badges) */\n#digito-chat,\n#bc-btn-digito-chat,\n#bc-btn-digito-chat-maximize,\n#app_cookieconsent,\n#ETBIS,\n.etbis {\n  display: none !important;\n}\n\n/* Subtle, modern focus halo */\n.tod-xbox-focus {\n  outline: 2px solid rgba(255, 255, 255, 0.95) !important;\n  outline-offset: 2px !important;\n  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.38), 0 6px 18px rgba(0, 0, 0, 0.45) !important;\n  transition: outline 0.12s ease, box-shadow 0.12s ease !important;\n  position: relative;\n  z-index: 9999 !important;\n}\n\n/* Guaranteed 100vw x 100vh Fullscreen Player Mode */\n.tod-xbox-forced-fullscreen {\n  position: fixed !important;\n  inset: 0 !important;\n  top: 0 !important;\n  left: 0 !important;\n  width: 100vw !important;\n  height: 100vh !important;\n  max-width: 100vw !important;\n  max-height: 100vh !important;\n  z-index: 999998 !important;\n  background: #000 !important;\n}\n\n.tod-xbox-forced-fullscreen video {\n  width: 100vw !important;\n  height: 100vh !important;\n  object-fit: contain !important;\n  background: #000 !important;\n}\n\n/* Glassmorphic Top Quick-Channel Dock */\n#tod-xbox-channel-dock {\n  position: fixed;\n  top: 14px;\n  left: 50%;\n  transform: translateX(-50%) translateY(-140%);\n  opacity: 0;\n  pointer-events: none;\n  display: flex;\n  align-items: center;\n  gap: 6px;\n  padding: 6px 10px;\n  background: rgba(15, 23, 42, 0.84);\n  backdrop-filter: blur(16px);\n  -webkit-backdrop-filter: blur(16px);\n  border: 1px solid rgba(255, 255, 255, 0.14);\n  border-radius: 999px;\n  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55);\n  z-index: 1000001;\n  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;\n  max-width: 96vw;\n  overflow-x: auto;\n}\n\n#tod-xbox-channel-dock.tod-xbox-dock-open {\n  transform: translateX(-50%) translateY(0);\n  opacity: 1;\n  pointer-events: auto;\n}\n\n.tod-xbox-dock-item {\n  appearance: none;\n  border: 1px solid rgba(255, 255, 255, 0.08);\n  background: rgba(255, 255, 255, 0.06);\n  color: #f1f5f9;\n  font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif;\n  font-size: 13px;\n  font-weight: 500;\n  padding: 6px 13px;\n  border-radius: 999px;\n  cursor: pointer;\n  white-space: nowrap;\n  text-decoration: none;\n  transition: background 0.15s ease, color 0.15s ease;\n}\n\n.tod-xbox-dock-item:hover,\n.tod-xbox-dock-item.active {\n  background: rgba(16, 185, 129, 0.25);\n  border-color: rgba(16, 185, 129, 0.6);\n  color: #ffffff;\n}\n\n/* Subtle bottom-right mini controller pill */\n#tod-xbox-hud {\n  position: fixed;\n  bottom: 16px;\n  right: 18px;\n  background: rgba(15, 23, 42, 0.76);\n  backdrop-filter: blur(12px);\n  -webkit-backdrop-filter: blur(12px);\n  color: rgba(241, 245, 249, 0.88);\n  border: 1px solid rgba(255, 255, 255, 0.12);\n  border-radius: 999px;\n  padding: 6px 14px;\n  font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif;\n  font-size: 12px;\n  font-weight: 500;\n  letter-spacing: 0.2px;\n  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);\n  z-index: 1000000;\n  pointer-events: none;\n  transition: opacity 0.3s ease;\n  white-space: nowrap;\n}\n\n#tod-xbox-hud.tod-xbox-hud-hidden {\n  opacity: 0;\n}\n";
 (() => {
   // src/core/gamepad-nav.js
   var DEFAULT_SELECTOR = [
@@ -237,7 +237,7 @@ globalThis.__TOD_XBOX_INLINE_CSS__ = "/* 65-inch 4K TV (10-foot UI) Styles for X
     const win = doc.defaultView || window;
     let curr = el;
     while (curr && curr.nodeType === 1) {
-      if (curr.hidden || curr.getAttribute("aria-hidden") === "true" || curr.classList && curr.classList.contains("hidden")) {
+      if (curr.hidden || curr.getAttribute("aria-hidden") === "true" || curr.classList && (curr.classList.contains("hidden") || curr.classList.contains("hide-force") || curr.classList.contains("sr-only"))) {
         return false;
       }
       const style = win.getComputedStyle ? win.getComputedStyle(curr) : curr.style;
@@ -248,18 +248,29 @@ globalThis.__TOD_XBOX_INLINE_CSS__ = "/* 65-inch 4K TV (10-foot UI) Styles for X
     }
     return true;
   }
+  function isSearchInput(el) {
+    const id = (el.id || "").toLowerCase();
+    const formId = (el.getAttribute("data-form-id") || "").toLowerCase();
+    const parentFormId = (el.form && el.form.id ? el.form.id : "").toLowerCase();
+    return id.includes("search") || formId.includes("search") || parentFormId.includes("search") || el.type === "search";
+  }
   function detectLoginState(doc = document) {
+    const todLoginForm = doc.getElementById("bc-form-login");
+    const scopeRoot = todLoginForm && isHierarchyVisible(todLoginForm, doc) ? todLoginForm : doc;
     const inputs = Array.from(
-      doc.querySelectorAll(
+      scopeRoot.querySelectorAll(
         'input[type="text"], input[type="email"], input[type="tel"], input[type="number"], input:not([type]), input[type="password"]'
       )
-    ).filter((el) => !el.disabled && el.type !== "hidden" && isHierarchyVisible(el, doc));
+    ).filter(
+      (el) => !el.disabled && el.type !== "hidden" && el.type !== "checkbox" && !isSearchInput(el) && isHierarchyVisible(el, doc)
+    );
     const buttons = Array.from(
-      doc.querySelectorAll('button, input[type="submit"], a[href], [role="button"]')
+      scopeRoot.querySelectorAll('button, input[type="submit"], a[href], [role="button"]')
     ).filter((el) => {
       if (!isHierarchyVisible(el, doc)) return false;
-      const label = `${el.textContent || ""} ${el.value || ""} ${el.getAttribute("aria-label") || ""}`.trim();
-      return el.type === "submit" || LOGIN_BUTTON_PATTERNS.test(label);
+      if (el.classList && el.classList.contains("toggle-password-view")) return false;
+      const label = `${el.textContent || ""} ${el.value || ""} ${el.getAttribute("aria-label") || ""} ${el.id || ""}`.trim();
+      return el.type === "submit" || el.id === "bc-btn-login-submit" || LOGIN_BUTTON_PATTERNS.test(label);
     });
     const hasPasswordOrInput = inputs.length > 0;
     const elements = [...inputs, ...buttons];
@@ -295,12 +306,23 @@ globalThis.__TOD_XBOX_INLINE_CSS__ = "/* 65-inch 4K TV (10-foot UI) Styles for X
   }
 
   // src/core/live-player.js
+  var QUICK_CHANNELS = [
+    { id: "tod-ch-matches", label: "\u26BD Haftan\u0131n Ma\xE7lar\u0131", url: "https://www.todtv.com.tr/spor/haftanin-maclari" },
+    { id: "tod-ch-bein1", label: "\u{1F534} beIN SPORTS 1", url: "https://www.todtv.com.tr/canli-tv/bein-sports-1?c=spor" },
+    { id: "tod-ch-bein2", label: "\u{1F534} beIN SPORTS 2", url: "https://www.todtv.com.tr/canli-tv/bein-sports-2?c=spor" },
+    { id: "tod-ch-bein3", label: "\u{1F534} beIN SPORTS 3", url: "https://www.todtv.com.tr/canli-tv/bein-sports-3?c=spor" },
+    { id: "tod-ch-bein4", label: "\u{1F534} beIN SPORTS 4", url: "https://www.todtv.com.tr/canli-tv/bein-sports-4?c=spor" },
+    { id: "tod-ch-beinmax1", label: "\u{1F534} beIN MAX 1", url: "https://www.todtv.com.tr/canli-tv/bein-sports-max-1?c=spor" },
+    { id: "tod-ch-beinhaber", label: "\u{1F4FA} beIN HABER", url: "https://www.todtv.com.tr/canli-tv/bein-sports-haber?c=spor" }
+  ];
   var CHANNEL_SELECTOR = [
     ".live-channel-item",
     ".channel-card",
     'a[href*="/canli-izle"]',
-    'a[href*="/canli-tv"]',
-    "[data-channel-id]"
+    'a[href*="/canli-tv/"]',
+    'a[href*="/mac-detay/"]',
+    "[data-channel-id]",
+    ".tod-xbox-dock-item"
   ].join(", ");
   var PLAYER_CONTAINER_SELECTOR = [
     ".player-container",
@@ -381,6 +403,12 @@ globalThis.__TOD_XBOX_INLINE_CSS__ = "/* 65-inch 4K TV (10-foot UI) Styles for X
     function getChannelElements() {
       const win = doc.defaultView || window;
       return Array.from(doc.querySelectorAll(CHANNEL_SELECTOR)).filter((el) => {
+        if (el.classList && el.classList.contains("tod-xbox-dock-item")) {
+          const dock = el.closest("#tod-xbox-channel-dock");
+          if (dock && !dock.classList.contains("tod-xbox-dock-open")) {
+            return false;
+          }
+        }
         let curr = el;
         while (curr && curr.nodeType === 1) {
           if (curr.hidden || curr.getAttribute("aria-hidden") === "true" || curr.classList && curr.classList.contains("hidden")) {
@@ -396,7 +424,7 @@ globalThis.__TOD_XBOX_INLINE_CSS__ = "/* 65-inch 4K TV (10-foot UI) Styles for X
       });
     }
     function switchChannel(delta) {
-      const channels = getChannelElements();
+      const channels = getChannelElements().filter((el) => !el.classList.contains("tod-xbox-dock-item"));
       if (channels.length === 0) return null;
       let currentIdx = channels.findIndex(
         (el) => el.classList.contains("active") || el.classList.contains("tod-xbox-focus") || el.getAttribute("aria-current") === "true"
@@ -423,7 +451,7 @@ globalThis.__TOD_XBOX_INLINE_CSS__ = "/* 65-inch 4K TV (10-foot UI) Styles for X
   }
 
   // src/index.js
-  var HUD_TEXT = "[A] Se\xE7/Oynat  [X] Tam Ekran  [B] Geri  [LB/RB] Kanal De\u011Fi\u015Ftir";
+  var HUD_TEXT = "[A] Se\xE7  [X/F] Tam Ekran  [Y/C] Kanallar  [LB/RB] Kanal De\u011Fi\u015Ftir";
   function initTodXboxLive(doc = document, injectedCss = "") {
     const win = doc.defaultView || window;
     if (win.__TOD_XBOX_LIVE_ACTIVE__) {
@@ -434,6 +462,23 @@ globalThis.__TOD_XBOX_INLINE_CSS__ = "/* 65-inch 4K TV (10-foot UI) Styles for X
       styleEl.id = "tod-xbox-tv-styles";
       styleEl.textContent = injectedCss;
       (doc.head || doc.documentElement).appendChild(styleEl);
+    }
+    let dock = doc.getElementById("tod-xbox-channel-dock");
+    if (!dock && doc.body) {
+      dock = doc.createElement("nav");
+      dock.id = "tod-xbox-channel-dock";
+      for (const ch of QUICK_CHANNELS) {
+        const link = doc.createElement("a");
+        link.id = ch.id;
+        link.className = "tod-xbox-dock-item";
+        link.href = ch.url;
+        link.textContent = ch.label;
+        if (win.location && win.location.href && win.location.href.includes(ch.url.replace("https://www.todtv.com.tr", ""))) {
+          link.classList.add("active");
+        }
+        dock.appendChild(link);
+      }
+      doc.body.appendChild(dock);
     }
     let hud = doc.getElementById("tod-xbox-hud");
     if (!hud && doc.body) {
@@ -448,22 +493,23 @@ globalThis.__TOD_XBOX_INLINE_CSS__ = "/* 65-inch 4K TV (10-foot UI) Styles for X
       if (!hud) return;
       hud.classList.remove("tod-xbox-hud-hidden");
       if (hudTimer) clearTimeout(hudTimer);
-      if (player.isFullscreen()) {
-        hudTimer = setTimeout(() => {
-          if (player.isFullscreen() && hud) {
-            hud.classList.add("tod-xbox-hud-hidden");
-          }
-        }, 3e3);
-      }
+      hudTimer = setTimeout(() => {
+        if (hud) {
+          hud.classList.add("tod-xbox-hud-hidden");
+        }
+      }, 3500);
     }
     const nav = createSpatialNavigator({
       document: doc,
       getCandidates(d) {
+        if (dock && dock.classList.contains("tod-xbox-dock-open")) {
+          return Array.from(dock.querySelectorAll(".tod-xbox-dock-item"));
+        }
         const loginState = detectLoginState(d);
         const channels = player.getChannelElements();
         const others = Array.from(
           d.querySelectorAll('button, a[href], input:not([type="hidden"]), [role="button"]')
-        );
+        ).filter((el) => !el.closest("#tod-xbox-channel-dock"));
         if (loginState.isLoginVisible && loginState.elements.length > 0) {
           return [...loginState.elements, ...channels, ...others];
         }
@@ -484,6 +530,11 @@ globalThis.__TOD_XBOX_INLINE_CSS__ = "/* 65-inch 4K TV (10-foot UI) Styles for X
           await player.toggleFullscreen();
           pulseHud();
         } else if (action === "B") {
+          if (dock && dock.classList.contains("tod-xbox-dock-open")) {
+            dock.classList.remove("tod-xbox-dock-open");
+            nav.refresh();
+            return;
+          }
           if (player.isFullscreen()) {
             await player.exitFullscreen();
             pulseHud();
@@ -491,8 +542,14 @@ globalThis.__TOD_XBOX_INLINE_CSS__ = "/* 65-inch 4K TV (10-foot UI) Styles for X
             win.history.back();
           }
         } else if (action === "Y") {
-          if (win.location && !win.location.pathname.includes("/canli-tv")) {
-            win.location.href = "https://www.todtv.com.tr/canli-tv";
+          if (dock) {
+            const isOpen = dock.classList.toggle("tod-xbox-dock-open");
+            if (isOpen) {
+              const firstItem = dock.querySelector(".tod-xbox-dock-item.active") || dock.querySelector(".tod-xbox-dock-item");
+              if (firstItem) nav.focusElement(firstItem);
+            } else {
+              nav.refresh();
+            }
           }
         } else if (action === "LB") {
           const target = player.switchChannel(-1);
@@ -504,7 +561,8 @@ globalThis.__TOD_XBOX_INLINE_CSS__ = "/* 65-inch 4K TV (10-foot UI) Styles for X
       }
     });
     nav.refresh();
-    const instance = { nav, player, hud };
+    pulseHud();
+    const instance = { nav, player, hud, dock };
     win.__TOD_XBOX_LIVE_ACTIVE__ = instance;
     return instance;
   }

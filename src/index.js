@@ -1,8 +1,8 @@
 import { createSpatialNavigator } from './core/gamepad-nav.js';
 import { detectLoginState, activateLoginElement } from './core/login-helper.js';
-import { createLivePlayerController } from './core/live-player.js';
+import { createLivePlayerController, QUICK_CHANNELS } from './core/live-player.js';
 
-export const HUD_TEXT = '[A] Seç/Oynat  [X] Tam Ekran  [B] Geri  [LB/RB] Kanal Değiştir';
+export const HUD_TEXT = '[A] Seç  [X/F] Tam Ekran  [Y/C] Kanallar  [LB/RB] Kanal Değiştir';
 
 export function initTodXboxLive(doc = document, injectedCss = '') {
   const win = doc.defaultView || window;
@@ -15,6 +15,24 @@ export function initTodXboxLive(doc = document, injectedCss = '') {
     styleEl.id = 'tod-xbox-tv-styles';
     styleEl.textContent = injectedCss;
     (doc.head || doc.documentElement).appendChild(styleEl);
+  }
+
+  let dock = doc.getElementById('tod-xbox-channel-dock');
+  if (!dock && doc.body) {
+    dock = doc.createElement('nav');
+    dock.id = 'tod-xbox-channel-dock';
+    for (const ch of QUICK_CHANNELS) {
+      const link = doc.createElement('a');
+      link.id = ch.id;
+      link.className = 'tod-xbox-dock-item';
+      link.href = ch.url;
+      link.textContent = ch.label;
+      if (win.location && win.location.href && win.location.href.includes(ch.url.replace('https://www.todtv.com.tr', ''))) {
+        link.classList.add('active');
+      }
+      dock.appendChild(link);
+    }
+    doc.body.appendChild(dock);
   }
 
   let hud = doc.getElementById('tod-xbox-hud');
@@ -32,23 +50,24 @@ export function initTodXboxLive(doc = document, injectedCss = '') {
     if (!hud) return;
     hud.classList.remove('tod-xbox-hud-hidden');
     if (hudTimer) clearTimeout(hudTimer);
-    if (player.isFullscreen()) {
-      hudTimer = setTimeout(() => {
-        if (player.isFullscreen() && hud) {
-          hud.classList.add('tod-xbox-hud-hidden');
-        }
-      }, 3000);
-    }
+    hudTimer = setTimeout(() => {
+      if (hud) {
+        hud.classList.add('tod-xbox-hud-hidden');
+      }
+    }, 3500);
   }
 
   const nav = createSpatialNavigator({
     document: doc,
     getCandidates(d) {
+      if (dock && dock.classList.contains('tod-xbox-dock-open')) {
+        return Array.from(dock.querySelectorAll('.tod-xbox-dock-item'));
+      }
       const loginState = detectLoginState(d);
       const channels = player.getChannelElements();
       const others = Array.from(
         d.querySelectorAll('button, a[href], input:not([type="hidden"]), [role="button"]')
-      );
+      ).filter(el => !el.closest('#tod-xbox-channel-dock'));
       if (loginState.isLoginVisible && loginState.elements.length > 0) {
         return [...loginState.elements, ...channels, ...others];
       }
@@ -74,6 +93,11 @@ export function initTodXboxLive(doc = document, injectedCss = '') {
         await player.toggleFullscreen();
         pulseHud();
       } else if (action === 'B') {
+        if (dock && dock.classList.contains('tod-xbox-dock-open')) {
+          dock.classList.remove('tod-xbox-dock-open');
+          nav.refresh();
+          return;
+        }
         if (player.isFullscreen()) {
           await player.exitFullscreen();
           pulseHud();
@@ -81,8 +105,14 @@ export function initTodXboxLive(doc = document, injectedCss = '') {
           win.history.back();
         }
       } else if (action === 'Y') {
-        if (win.location && !win.location.pathname.includes('/canli-tv')) {
-          win.location.href = 'https://www.todtv.com.tr/canli-tv';
+        if (dock) {
+          const isOpen = dock.classList.toggle('tod-xbox-dock-open');
+          if (isOpen) {
+            const firstItem = dock.querySelector('.tod-xbox-dock-item.active') || dock.querySelector('.tod-xbox-dock-item');
+            if (firstItem) nav.focusElement(firstItem);
+          } else {
+            nav.refresh();
+          }
         }
       } else if (action === 'LB') {
         const target = player.switchChannel(-1);
@@ -95,7 +125,8 @@ export function initTodXboxLive(doc = document, injectedCss = '') {
   });
 
   nav.refresh();
-  const instance = { nav, player, hud };
+  pulseHud();
+  const instance = { nav, player, hud, dock };
   win.__TOD_XBOX_LIVE_ACTIVE__ = instance;
   return instance;
 }
@@ -113,4 +144,3 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
     boot();
   }
 }
-

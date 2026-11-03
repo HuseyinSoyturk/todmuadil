@@ -42,5 +42,28 @@ describe('login-helper', () => {
     expect(state.isLoginVisible).toBe(false);
     expect(state.elements).toEqual([]);
   });
+
+  it('targets real todtv.com.tr #bc-form-login fields and excludes header quick-search input (#bc-input-search)', () => {
+    document.body.innerHTML = `
+      <form id="bc-form-quick-search">
+        <input type="text" id="bc-input-search" data-form-id="QuickSearchForm" />
+        <button type="button" id="bc-btn-close-search">Kapat</button>
+      </form>
+      <main id="bc-page-login">
+        <form action="/kullanici/giris" id="bc-form-login" method="post">
+          <input class="bc-form-input" id="bc-input-username" name="User" type="text" />
+          <input class="bc-form-input" id="bc-input-password" name="Password" type="password" />
+          <button id="bc-btn-login-submit" type="submit">Giriş Yap</button>
+        </form>
+      </main>
+    `;
+    const state = detectLoginState(document);
+    expect(state.isLoginVisible).toBe(true);
+    expect(state.elements.map(e => e.id)).toEqual([
+      'bc-input-username',
+      'bc-input-password',
+      'bc-btn-login-submit'
+    ]);
+  });
 });
 

@@ -7,7 +7,7 @@ function isHierarchyVisible(el, doc) {
     if (
       curr.hidden ||
       curr.getAttribute('aria-hidden') === 'true' ||
-      (curr.classList && curr.classList.contains('hidden'))
+      (curr.classList && (curr.classList.contains('hidden') || curr.classList.contains('hide-force') || curr.classList.contains('sr-only')))
     ) {
       return false;
     }
@@ -20,19 +20,43 @@ function isHierarchyVisible(el, doc) {
   return true;
 }
 
+function isSearchInput(el) {
+  const id = (el.id || '').toLowerCase();
+  const formId = (el.getAttribute('data-form-id') || '').toLowerCase();
+  const parentFormId = (el.form && el.form.id ? el.form.id : '').toLowerCase();
+  return (
+    id.includes('search') ||
+    formId.includes('search') ||
+    parentFormId.includes('search') ||
+    el.type === 'search'
+  );
+}
+
 export function detectLoginState(doc = document) {
+  // Prioritize real todtv.com.tr #bc-form-login if present
+  const todLoginForm = doc.getElementById('bc-form-login');
+  const scopeRoot = todLoginForm && isHierarchyVisible(todLoginForm, doc) ? todLoginForm : doc;
+
   const inputs = Array.from(
-    doc.querySelectorAll(
+    scopeRoot.querySelectorAll(
       'input[type="text"], input[type="email"], input[type="tel"], input[type="number"], input:not([type]), input[type="password"]'
     )
-  ).filter(el => !el.disabled && el.type !== 'hidden' && isHierarchyVisible(el, doc));
+  ).filter(
+    el =>
+      !el.disabled &&
+      el.type !== 'hidden' &&
+      el.type !== 'checkbox' &&
+      !isSearchInput(el) &&
+      isHierarchyVisible(el, doc)
+  );
 
   const buttons = Array.from(
-    doc.querySelectorAll('button, input[type="submit"], a[href], [role="button"]')
+    scopeRoot.querySelectorAll('button, input[type="submit"], a[href], [role="button"]')
   ).filter(el => {
     if (!isHierarchyVisible(el, doc)) return false;
-    const label = `${el.textContent || ''} ${el.value || ''} ${el.getAttribute('aria-label') || ''}`.trim();
-    return el.type === 'submit' || LOGIN_BUTTON_PATTERNS.test(label);
+    if (el.classList && el.classList.contains('toggle-password-view')) return false;
+    const label = `${el.textContent || ''} ${el.value || ''} ${el.getAttribute('aria-label') || ''} ${el.id || ''}`.trim();
+    return el.type === 'submit' || el.id === 'bc-btn-login-submit' || LOGIN_BUTTON_PATTERNS.test(label);
   });
 
   const hasPasswordOrInput = inputs.length > 0;
