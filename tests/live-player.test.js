@@ -13,6 +13,10 @@ describe('createLivePlayerController', () => {
         <video id="live-video" muted></video>
       </div>
     `;
+    document.getElementById('live-video').play = vi.fn().mockResolvedValue();
+    document.querySelectorAll('.live-channel-item').forEach(el => {
+      el.addEventListener('click', e => e.preventDefault());
+    });
   });
 
   it('activates forced 65-inch CSS fullscreen and unmutes video when requestFullscreen is unavailable or fails', async () => {

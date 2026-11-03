@@ -1,0 +1,35 @@
+name: Build Xbox UWP Package
+
+on:
+  push:
+    branches: [ main, "feat/**" ]
+  workflow_dispatch:
+
+jobs:
+  build-xbox:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Build TOD Xbox Live JS Bundle
+        run: |
+          npm ci
+          npm test
+          npm run build
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Upload Ready Bundle Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tod-xbox-live-bundle
+          path: |
+            dist/tod-xbox-live.bundle.js
+            xbox-uwp/
