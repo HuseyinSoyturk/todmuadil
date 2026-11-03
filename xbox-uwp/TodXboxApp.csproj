@@ -21,6 +21,7 @@
     <AppxBundlePlatforms>x64</AppxBundlePlatforms>
     <AppxPackageSigningEnabled>false</AppxPackageSigningEnabled>
     <RuntimeIdentifiers>win10-x64</RuntimeIdentifiers>
+    <WebView2UseWinRT>true</WebView2UseWinRT>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
     <OutputPath>bin\x64\Release\</OutputPath>

@@ -29,11 +29,16 @@ jobs:
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
 
-      - name: Restore & Build Xbox UWP AppxBundle
+      - name: Restore NuGet Packages
+        shell: pwsh
+        run: |
+          msbuild xbox-uwp/TodXboxApp.csproj /t:Restore /p:Configuration=Release /p:Platform=x64
+
+      - name: Build Xbox UWP AppxBundle
         shell: pwsh
         run: |
           $out = msbuild xbox-uwp/TodXboxApp.csproj `
-            /t:Restore,Build `
+            /t:Build `
             /p:Configuration=Release `
             /p:Platform=x64 `
             /p:AppxBundle=Always `
