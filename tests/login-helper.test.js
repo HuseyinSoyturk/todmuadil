@@ -27,5 +27,20 @@ describe('login-helper', () => {
     expect(focusSpy).toHaveBeenCalled();
     expect(clickSpy).toHaveBeenCalled();
   });
+
+  it('ignores login inputs inside a .hidden or display:none ancestor container', () => {
+    document.body.innerHTML = `
+      <div id="login-panel" class="hidden">
+        <form id="login-form">
+          <input id="username" type="text" />
+          <input id="password" type="password" />
+          <button id="submit-btn" type="submit">Giriş Yap</button>
+        </form>
+      </div>
+    `;
+    const state = detectLoginState(document);
+    expect(state.isLoginVisible).toBe(false);
+    expect(state.elements).toEqual([]);
+  });
 });
 

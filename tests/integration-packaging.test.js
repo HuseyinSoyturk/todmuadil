@@ -15,5 +15,20 @@ describe('Xbox UWP & Preview Server artifacts', () => {
     const manifest = fs.readFileSync(path.resolve('xbox-uwp/Package.appxmanifest'), 'utf8');
     expect(manifest).toContain('Windows.Xbox');
   });
+
+  it('serves the JavaScript bundle when requested with a cache-busting query string (?t=...)', async () => {
+    const { createPreviewServer } = await import('../tools/dev-preview-server.js');
+    const server = createPreviewServer();
+    await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+    const { port } = server.address();
+    try {
+      const res = await fetch(`http://127.0.0.1:${port}/tod-xbox-live.bundle.js?t=123456`);
+      expect(res.headers.get('content-type')).toContain('application/javascript');
+      const body = await res.text();
+      expect(body).toContain('__TOD_XBOX_INLINE_CSS__');
+    } finally {
+      server.close();
+    }
+  });
 });
 

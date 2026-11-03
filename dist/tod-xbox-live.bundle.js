@@ -1,4 +1,4 @@
-globalThis.__TOD_XBOX_INLINE_CSS__ = "/* 65-inch 4K TV (10-foot UI) Styles for Xbox TOD App */\n\n.tod-xbox-focus {\n  outline: 4px solid #00e676 !important;\n  outline-offset: 3px !important;\n  box-shadow: 0 0 24px rgba(0, 230, 118, 0.75) !important;\n  transform: scale(1.04) !important;\n  transition: transform 0.15s ease, box-shadow 0.15s ease, outline 0.15s ease !important;\n  z-index: 9999 !important;\n  position: relative;\n}\n\n.tod-xbox-forced-fullscreen {\n  position: fixed !important;\n  inset: 0 !important;\n  top: 0 !important;\n  left: 0 !important;\n  width: 100vw !important;\n  height: 100vh !important;\n  max-width: 100vw !important;\n  max-height: 100vh !important;\n  z-index: 999999 !important;\n  background: #000 !important;\n}\n\n.tod-xbox-forced-fullscreen video {\n  width: 100vw !important;\n  height: 100vh !important;\n  object-fit: contain !important;\n  background: #000 !important;\n}\n\n#tod-xbox-hud {\n  position: fixed;\n  bottom: 28px;\n  left: 50%;\n  transform: translateX(-50%);\n  background: rgba(12, 16, 23, 0.88);\n  color: #ffffff;\n  border: 2px solid rgba(0, 230, 118, 0.65);\n  border-radius: 14px;\n  padding: 14px 28px;\n  font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif;\n  font-size: 22px;\n  font-weight: 600;\n  letter-spacing: 0.4px;\n  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7);\n  z-index: 1000000;\n  pointer-events: none;\n  transition: opacity 0.35s ease;\n  white-space: nowrap;\n}\n\n#tod-xbox-hud.tod-xbox-hud-hidden {\n  opacity: 0;\n}\n";
+globalThis.__TOD_XBOX_INLINE_CSS__ = "/* 65-inch 4K TV (10-foot UI) Styles for Xbox TOD App */\n\n.tod-xbox-focus {\n  outline: 4px solid #00e676 !important;\n  outline-offset: 3px !important;\n  box-shadow: 0 0 24px rgba(0, 230, 118, 0.75) !important;\n  transform: scale(1.04) !important;\n  transition: transform 0.15s ease, box-shadow 0.15s ease, outline 0.15s ease !important;\n  z-index: 9999 !important;\n  position: relative;\n}\n\n.tod-xbox-forced-fullscreen {\n  position: fixed !important;\n  inset: 0 !important;\n  top: 0 !important;\n  left: 0 !important;\n  width: 100vw !important;\n  height: 100vh !important;\n  max-width: 100vw !important;\n  max-height: 100vh !important;\n  z-index: 999999 !important;\n  background: #000 !important;\n}\n\n.tod-xbox-forced-fullscreen video {\n  width: 100vw !important;\n  height: 100vh !important;\n  object-fit: contain !important;\n  background: #000 !important;\n}\n\n#tod-xbox-hud {\n  position: fixed;\n  bottom: 28px;\n  left: 50%;\n  transform: translateX(-50%);\n  background: rgba(12, 16, 23, 0.88);\n  color: #ffffff;\n  border: 2px solid rgba(0, 230, 118, 0.65);\n  border-radius: 14px;\n  padding: 14px 28px;\n  font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif;\n  font-size: 22px;\n  font-weight: 600;\n  letter-spacing: 0.4px;\n  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7);\n  z-index: 1000000;\n  pointer-events: none;\n  transition: opacity 0.35s ease;\n  white-space: nowrap;\n}\n\n#tod-xbox-hud.tod-xbox-hud-hidden {\n  opacity: 0;\n}\n\n";
 (() => {
   // src/core/gamepad-nav.js
   var DEFAULT_SELECTOR = [
@@ -11,7 +11,7 @@ globalThis.__TOD_XBOX_INLINE_CSS__ = "/* 65-inch 4K TV (10-foot UI) Styles for X
     ".channel-card"
   ].join(", ");
   function isElementVisible(el, win) {
-    if (!el?.isConnected) return false;
+    if (!el || !el.isConnected) return false;
     const style = win.getComputedStyle ? win.getComputedStyle(el) : el.style;
     if (style && (style.display === "none" || style.visibility === "hidden" || style.opacity === "0")) {
       return false;
@@ -45,6 +45,9 @@ globalThis.__TOD_XBOX_INLINE_CSS__ = "/* 65-inch 4K TV (10-foot UI) Styles for X
     }
     function focusElement(el) {
       if (!el) return;
+      if (doc.activeElement && doc.activeElement !== el && typeof doc.activeElement.blur === "function") {
+        doc.activeElement.blur();
+      }
       if (activeEl && activeEl !== el) {
         activeEl.classList.remove("tod-xbox-focus");
       }
@@ -230,15 +233,31 @@ globalThis.__TOD_XBOX_INLINE_CSS__ = "/* 65-inch 4K TV (10-foot UI) Styles for X
 
   // src/core/login-helper.js
   var LOGIN_BUTTON_PATTERNS = /giriş\s*yap|oturum\s*aç|devam\s*et|gönder|doğrula|login|sign\s*in/i;
+  function isHierarchyVisible(el, doc) {
+    const win = doc.defaultView || window;
+    let curr = el;
+    while (curr && curr.nodeType === 1) {
+      if (curr.hidden || curr.getAttribute("aria-hidden") === "true" || curr.classList && curr.classList.contains("hidden")) {
+        return false;
+      }
+      const style = win.getComputedStyle ? win.getComputedStyle(curr) : curr.style;
+      if (style && (style.display === "none" || style.visibility === "hidden" || style.opacity === "0")) {
+        return false;
+      }
+      curr = curr.parentElement;
+    }
+    return true;
+  }
   function detectLoginState(doc = document) {
     const inputs = Array.from(
       doc.querySelectorAll(
         'input[type="text"], input[type="email"], input[type="tel"], input[type="number"], input:not([type]), input[type="password"]'
       )
-    ).filter((el) => !el.disabled && el.type !== "hidden");
+    ).filter((el) => !el.disabled && el.type !== "hidden" && isHierarchyVisible(el, doc));
     const buttons = Array.from(
       doc.querySelectorAll('button, input[type="submit"], a[href], [role="button"]')
     ).filter((el) => {
+      if (!isHierarchyVisible(el, doc)) return false;
       const label = `${el.textContent || ""} ${el.value || ""} ${el.getAttribute("aria-label") || ""}`.trim();
       return el.type === "submit" || LOGIN_BUTTON_PATTERNS.test(label);
     });
@@ -360,7 +379,21 @@ globalThis.__TOD_XBOX_INLINE_CSS__ = "/* 65-inch 4K TV (10-foot UI) Styles for X
       return true;
     }
     function getChannelElements() {
-      return Array.from(doc.querySelectorAll(CHANNEL_SELECTOR));
+      const win = doc.defaultView || window;
+      return Array.from(doc.querySelectorAll(CHANNEL_SELECTOR)).filter((el) => {
+        let curr = el;
+        while (curr && curr.nodeType === 1) {
+          if (curr.hidden || curr.getAttribute("aria-hidden") === "true" || curr.classList && curr.classList.contains("hidden")) {
+            return false;
+          }
+          const style = win.getComputedStyle ? win.getComputedStyle(curr) : curr.style;
+          if (style && (style.display === "none" || style.visibility === "hidden" || style.opacity === "0")) {
+            return false;
+          }
+          curr = curr.parentElement;
+        }
+        return true;
+      });
     }
     function switchChannel(delta) {
       const channels = getChannelElements();
@@ -427,13 +460,13 @@ globalThis.__TOD_XBOX_INLINE_CSS__ = "/* 65-inch 4K TV (10-foot UI) Styles for X
       document: doc,
       getCandidates(d) {
         const loginState = detectLoginState(d);
-        if (loginState.isLoginVisible && loginState.elements.length > 0) {
-          return loginState.elements;
-        }
         const channels = player.getChannelElements();
         const others = Array.from(
           d.querySelectorAll('button, a[href], input:not([type="hidden"]), [role="button"]')
         );
+        if (loginState.isLoginVisible && loginState.elements.length > 0) {
+          return [...loginState.elements, ...channels, ...others];
+        }
         return [...channels, ...others];
       },
       async onAction(action, activeEl) {
@@ -441,7 +474,7 @@ globalThis.__TOD_XBOX_INLINE_CSS__ = "/* 65-inch 4K TV (10-foot UI) Styles for X
         if (action === "A") {
           if (!activeEl) return;
           const loginState = detectLoginState(doc);
-          if (loginState.isLoginVisible || activeEl.tagName === "INPUT") {
+          if (loginState.elements.includes(activeEl) || activeEl.tagName === "INPUT" || activeEl.tagName === "TEXTAREA") {
             activateLoginElement(activeEl);
           } else {
             activeEl.click();

@@ -45,13 +45,13 @@ export function initTodXboxLive(doc = document, injectedCss = '') {
     document: doc,
     getCandidates(d) {
       const loginState = detectLoginState(d);
-      if (loginState.isLoginVisible && loginState.elements.length > 0) {
-        return loginState.elements;
-      }
       const channels = player.getChannelElements();
       const others = Array.from(
         d.querySelectorAll('button, a[href], input:not([type="hidden"]), [role="button"]')
       );
+      if (loginState.isLoginVisible && loginState.elements.length > 0) {
+        return [...loginState.elements, ...channels, ...others];
+      }
       return [...channels, ...others];
     },
     async onAction(action, activeEl) {
@@ -60,7 +60,11 @@ export function initTodXboxLive(doc = document, injectedCss = '') {
       if (action === 'A') {
         if (!activeEl) return;
         const loginState = detectLoginState(doc);
-        if (loginState.isLoginVisible || activeEl.tagName === 'INPUT') {
+        if (
+          loginState.elements.includes(activeEl) ||
+          activeEl.tagName === 'INPUT' ||
+          activeEl.tagName === 'TEXTAREA'
+        ) {
           activateLoginElement(activeEl);
         } else {
           activeEl.click();

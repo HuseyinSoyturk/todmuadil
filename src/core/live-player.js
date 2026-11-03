@@ -96,7 +96,25 @@ export function createLivePlayerController(doc = document) {
   }
 
   function getChannelElements() {
-    return Array.from(doc.querySelectorAll(CHANNEL_SELECTOR));
+    const win = doc.defaultView || window;
+    return Array.from(doc.querySelectorAll(CHANNEL_SELECTOR)).filter(el => {
+      let curr = el;
+      while (curr && curr.nodeType === 1) {
+        if (
+          curr.hidden ||
+          curr.getAttribute('aria-hidden') === 'true' ||
+          (curr.classList && curr.classList.contains('hidden'))
+        ) {
+          return false;
+        }
+        const style = win.getComputedStyle ? win.getComputedStyle(curr) : curr.style;
+        if (style && (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0')) {
+          return false;
+        }
+        curr = curr.parentElement;
+      }
+      return true;
+    });
   }
 
   function switchChannel(delta) {

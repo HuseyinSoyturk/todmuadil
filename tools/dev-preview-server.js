@@ -22,7 +22,7 @@ export function createPreviewServer() {
   return http.createServer((req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
 
-    if (req.url === '/tod-xbox-live.bundle.js') {
+    if (req.url && req.url.startsWith('/tod-xbox-live.bundle.js')) {
       const code = fs.readFileSync(bundlePath, 'utf8');
       res.writeHead(200, { 'Content-Type': 'application/javascript; charset=utf-8' });
       res.end(code);

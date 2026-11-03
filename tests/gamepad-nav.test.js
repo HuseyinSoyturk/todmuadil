@@ -81,5 +81,22 @@ describe('createSpatialNavigator', () => {
     nav.refresh();
     expect(nav.getActiveElement().id).toBe('ch2');
   });
+
+  it('blurs an active input element when D-Pad moves focus to another element', () => {
+    const input = document.createElement('input');
+    input.id = 'search-input';
+    input.className = 'channel-card';
+    mockRect(input, 50, 20);
+    document.getElementById('grid').prepend(input);
+
+    const nav = createSpatialNavigator({ selector: '.channel-card' });
+    nav.refresh();
+    input.focus();
+    expect(document.activeElement).toBe(input);
+
+    nav.move('down');
+    expect(nav.getActiveElement().id).toBe('ch1');
+    expect(document.activeElement).not.toBe(input);
+  });
 });
 
