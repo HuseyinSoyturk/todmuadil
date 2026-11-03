@@ -3,6 +3,11 @@ import { detectLoginState, activateLoginElement, setupTodLoginCaptchaHandler } f
 import { createLivePlayerController, QUICK_CHANNELS } from './core/live-player.js';
 
 export const HUD_TEXT = '[A] Seç  [X/F] Tam Ekran  [Y/C] Kanallar  [LB/RB] Kanal Değiştir';
+export const LOGIN_MOUSE_HUD_TEXT = '🖱️ Giriş Ekranı: Fare İmleci Aktif (Sol Analog + A)';
+
+export function isLoginUrlPath(pathname = '') {
+  return /\/(kullanici\/giris|kullanici\/uye-ol|kullanici\/sifremi|login)/i.test(pathname || '');
+}
 
 function repairLegacyTodBundleIfNeeded(doc) {
   const win = doc.defaultView || window;
@@ -40,6 +45,36 @@ export function initTodXboxLive(doc = document, injectedCss = '') {
     (doc.head || doc.documentElement).appendChild(styleEl);
   }
 
+  const isMouseLoginScreen = Boolean(win.location && isLoginUrlPath(win.location.pathname));
+
+  let hud = doc.getElementById('tod-xbox-hud');
+  if (!hud && doc.body) {
+    hud = doc.createElement('div');
+    hud.id = 'tod-xbox-hud';
+    hud.textContent = isMouseLoginScreen ? LOGIN_MOUSE_HUD_TEXT : HUD_TEXT;
+    doc.body.appendChild(hud);
+  }
+
+  let hudTimer = null;
+  function pulseHud() {
+    if (!hud) return;
+    hud.classList.remove('tod-xbox-hud-hidden');
+    if (hudTimer) clearTimeout(hudTimer);
+    hudTimer = setTimeout(() => {
+      if (hud) {
+        hud.classList.add('tod-xbox-hud-hidden');
+      }
+    }, 3500);
+  }
+
+  // On /kullanici/giris, let Xbox native mouse pointer handle form inputs & reCAPTCHA challenges
+  if (isMouseLoginScreen) {
+    pulseHud();
+    const loginInstance = { mode: 'mouse-login', hud };
+    win.__TOD_XBOX_LIVE_ACTIVE__ = loginInstance;
+    return loginInstance;
+  }
+
   let dock = doc.getElementById('tod-xbox-channel-dock');
   if (!dock && doc.body) {
     dock = doc.createElement('nav');
@@ -58,27 +93,7 @@ export function initTodXboxLive(doc = document, injectedCss = '') {
     doc.body.appendChild(dock);
   }
 
-  let hud = doc.getElementById('tod-xbox-hud');
-  if (!hud && doc.body) {
-    hud = doc.createElement('div');
-    hud.id = 'tod-xbox-hud';
-    hud.textContent = HUD_TEXT;
-    doc.body.appendChild(hud);
-  }
-
-  let hudTimer = null;
   const player = createLivePlayerController(doc);
-
-  function pulseHud() {
-    if (!hud) return;
-    hud.classList.remove('tod-xbox-hud-hidden');
-    if (hudTimer) clearTimeout(hudTimer);
-    hudTimer = setTimeout(() => {
-      if (hud) {
-        hud.classList.add('tod-xbox-hud-hidden');
-      }
-    }, 3500);
-  }
 
   const nav = createSpatialNavigator({
     document: doc,
@@ -150,7 +165,7 @@ export function initTodXboxLive(doc = document, injectedCss = '') {
 
   nav.refresh();
   pulseHud();
-  const instance = { nav, player, hud, dock };
+  const instance = { mode: 'tv-controller', nav, player, hud, dock };
   win.__TOD_XBOX_LIVE_ACTIVE__ = instance;
   return instance;
 }

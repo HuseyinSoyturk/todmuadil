@@ -8,7 +8,7 @@
   <Identity
     Name="lazhus.TodXboxCanliTV"
     Publisher="CN=39180ED3-CB8B-4F98-BAE6-68BF6163651D"
-    Version="1.0.3.0" />
+    Version="1.0.4.0" />
 
   <mp:PhoneIdentity PhoneProductId="9a8b7c6d-1234-4567-89ab-cdef01234567" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 

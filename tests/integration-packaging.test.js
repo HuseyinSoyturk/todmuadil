@@ -6,6 +6,9 @@ describe('Xbox UWP & Preview Server artifacts', () => {
   it('configures MainPage.xaml.cs with Xbox pointer suppression, overscan removal, and script injection', () => {
     const cs = fs.readFileSync(path.resolve('xbox-uwp/MainPage.xaml.cs'), 'utf8');
     expect(cs).toContain('RequiresPointerMode');
+    expect(cs).toContain('RequiresPointer.WhenEngaged');
+    expect(cs).toContain('RequiresPointer.Never');
+    expect(cs).toContain('/kullanici/giris');
     expect(cs).toContain('ApplicationViewBoundsMode.UseCoreWindow');
     expect(cs).toContain('AddScriptToExecuteOnDocumentCreatedAsync');
     expect(cs).toContain('https://www.todtv.com.tr/canli-tv');
