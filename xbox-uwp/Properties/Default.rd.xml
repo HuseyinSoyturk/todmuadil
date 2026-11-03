@@ -1,6 +1,7 @@
 <Directives xmlns="http://schemas.microsoft.com/netfx/2013/01/metadata">
   <Application>
     <Assembly Name="*Application*" Dynamic="Required All" />
+    <Namespace Name="Microsoft.UI.Xaml.Controls" Dynamic="Required All" />
+    <Namespace Name="Microsoft.Web.WebView2.Core" Dynamic="Required All" />
   </Application>
 </Directives>
-

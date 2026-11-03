@@ -1,11 +1,34 @@
 import { createSpatialNavigator } from './core/gamepad-nav.js';
-import { detectLoginState, activateLoginElement } from './core/login-helper.js';
+import { detectLoginState, activateLoginElement, setupTodLoginCaptchaHandler } from './core/login-helper.js';
 import { createLivePlayerController, QUICK_CHANNELS } from './core/live-player.js';
 
 export const HUD_TEXT = '[A] Seç  [X/F] Tam Ekran  [Y/C] Kanallar  [LB/RB] Kanal Değiştir';
 
+function repairLegacyTodBundleIfNeeded(doc) {
+  const win = doc.defaultView || window;
+  if (typeof win.BC !== 'undefined' || win.__TOD_BC_REPAIRED__) return;
+  const scriptEl = doc.querySelector('script[src*="bundle-bc"]');
+  if (!scriptEl || !scriptEl.src || typeof win.fetch !== 'function') return;
+  win.__TOD_BC_REPAIRED__ = true;
+  win
+    .fetch(scriptEl.src)
+    .then(function (r) {
+      return r.text();
+    })
+    .then(function (code) {
+      const patched = code.replace(/packageBtn\?\.element/g, '(packageBtn && packageBtn.element)');
+      const s = doc.createElement('script');
+      s.textContent = patched;
+      (doc.head || doc.documentElement).appendChild(s);
+    })
+    .catch(function () {});
+}
+
 export function initTodXboxLive(doc = document, injectedCss = '') {
   const win = doc.defaultView || window;
+  setupTodLoginCaptchaHandler(doc);
+  repairLegacyTodBundleIfNeeded(doc);
+
   if (win.__TOD_XBOX_LIVE_ACTIVE__) {
     return win.__TOD_XBOX_LIVE_ACTIVE__;
   }
@@ -60,6 +83,7 @@ export function initTodXboxLive(doc = document, injectedCss = '') {
   const nav = createSpatialNavigator({
     document: doc,
     getCandidates(d) {
+      setupTodLoginCaptchaHandler(d);
       if (dock && dock.classList.contains('tod-xbox-dock-open')) {
         return Array.from(dock.querySelectorAll('.tod-xbox-dock-item'));
       }
@@ -133,8 +157,8 @@ export function initTodXboxLive(doc = document, injectedCss = '') {
 
 if (typeof window !== 'undefined' && typeof document !== 'undefined') {
   const boot = () => {
-    const css = typeof globalThis.__TOD_XBOX_INLINE_CSS__ === 'string'
-      ? globalThis.__TOD_XBOX_INLINE_CSS__
+    const css = typeof window.__TOD_XBOX_INLINE_CSS__ === 'string'
+      ? window.__TOD_XBOX_INLINE_CSS__
       : '';
     initTodXboxLive(document, css);
   };

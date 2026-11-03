@@ -59,33 +59,24 @@ namespace TodXboxApp
         {
             string bundleJs = LoadBundleScript();
 
-            // 1. Try modern WebView2 first
+            // 1. Try modern WebView2 (already in XAML visual tree)
             try
             {
-                var webView2 = new Microsoft.UI.Xaml.Controls.WebView2
+                await TodWebView.EnsureCoreWebView2Async();
+
+                if (TodWebView.CoreWebView2 != null)
                 {
-                    HorizontalAlignment = HorizontalAlignment.Stretch,
-                    VerticalAlignment = VerticalAlignment.Stretch
-                };
-
-                BrowserHost.Children.Clear();
-                BrowserHost.Children.Add(webView2);
-
-                await webView2.EnsureCoreWebView2Async();
-
-                if (webView2.CoreWebView2 != null)
-                {
-                    var settings = webView2.CoreWebView2.Settings;
+                    var settings = TodWebView.CoreWebView2.Settings;
                     settings.AreDefaultContextMenusEnabled = false;
                     settings.AreDevToolsEnabled = false;
                     settings.IsStatusBarEnabled = false;
 
                     if (!string.IsNullOrEmpty(bundleJs))
                     {
-                        await webView2.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(bundleJs);
+                        await TodWebView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(bundleJs);
                     }
 
-                    webView2.Source = new Uri(TodLiveTvUrl);
+                    TodWebView.Source = new Uri(TodLiveTvUrl);
                     return;
                 }
             }
@@ -94,7 +85,7 @@ namespace TodXboxApp
                 // Fall back to system UWP WebView below if WebView2 runtime is unavailable on Xbox
             }
 
-            // 2. Guaranteed Xbox OS fallback: System UWP WebView
+            // 2. Guaranteed Xbox OS fallback: System UWP WebView with ES2017 bundle & reCAPTCHA bridge
             try
             {
                 BrowserHost.Children.Clear();

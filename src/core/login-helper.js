@@ -32,7 +32,62 @@ function isSearchInput(el) {
   );
 }
 
+export function setupTodLoginCaptchaHandler(doc = document) {
+  const loginForm = doc.getElementById('bc-form-login');
+  if (!loginForm || loginForm.getAttribute('data-tod-xbox-captcha') === '1') return;
+  loginForm.setAttribute('data-tod-xbox-captcha', '1');
+
+  loginForm.addEventListener('submit', function (e) {
+    const win = doc.defaultView || window;
+    const cm = win.captchaManager;
+    if (!cm || typeof cm.execute !== 'function') return;
+
+    const existingToken = typeof cm.getResponse === 'function' ? cm.getResponse() : '';
+    if (existingToken) {
+      if (typeof cm.addOrUpdateResponseFormInputElement === 'function') {
+        cm.addOrUpdateResponseFormInputElement(loginForm);
+      }
+      return;
+    }
+
+    e.preventDefault();
+    if (typeof e.stopImmediatePropagation === 'function') {
+      e.stopImmediatePropagation();
+    }
+
+    if (typeof cm.initialize === 'function' && win.grecaptcha && typeof win.grecaptcha.render === 'function') {
+      try {
+        cm.initialize();
+      } catch (err) {
+        // Ignore if already initialized
+      }
+    }
+
+    const onResponse = function () {
+      if (typeof cm.off === 'function' && cm.EVENTS) {
+        cm.off(cm.EVENTS.response, onResponse);
+      }
+      if (typeof cm.addOrUpdateResponseFormInputElement === 'function') {
+        cm.addOrUpdateResponseFormInputElement(loginForm);
+      }
+      loginForm.submit();
+    };
+
+    if (typeof cm.on === 'function' && cm.EVENTS) {
+      cm.on(cm.EVENTS.response, onResponse);
+    }
+
+    try {
+      cm.execute();
+    } catch (err) {
+      loginForm.submit();
+    }
+  });
+}
+
 export function detectLoginState(doc = document) {
+  setupTodLoginCaptchaHandler(doc);
+
   // Prioritize real todtv.com.tr #bc-form-login if present
   const todLoginForm = doc.getElementById('bc-form-login');
   const scopeRoot = todLoginForm && isHierarchyVisible(todLoginForm, doc) ? todLoginForm : doc;
@@ -85,15 +140,43 @@ export function activateLoginElement(el) {
     return 'input-focused';
   }
 
+  const form = el.form;
+  if (form && el.ownerDocument) {
+    setupTodLoginCaptchaHandler(el.ownerDocument);
+  }
+
+  let submitFired = false;
+  const onFormSubmit = function () {
+    submitFired = true;
+  };
+  if (form) {
+    form.addEventListener('submit', onFormSubmit, true);
+  }
+
   el.focus();
   el.click();
-  if (el.form && typeof el.form.requestSubmit === 'function' && el.type === 'submit') {
-    try {
-      el.form.requestSubmit(el);
-    } catch {
-      // click() already triggered default form submission in standard browsers
+
+  if (form) {
+    form.removeEventListener('submit', onFormSubmit, true);
+  }
+
+  if (form && !submitFired && el.type === 'submit') {
+    if (typeof form.requestSubmit === 'function') {
+      try {
+        form.requestSubmit(el);
+        return 'submitted';
+      } catch (err) {
+        // Fallback below
+      }
+    }
+    const doc = el.ownerDocument || document;
+    const evt = doc.createEvent('Event');
+    evt.initEvent('submit', true, true);
+    if (form.dispatchEvent(evt)) {
+      form.submit();
     }
     return 'submitted';
   }
-  return 'clicked';
+
+  return submitFired ? 'submitted' : 'clicked';
 }

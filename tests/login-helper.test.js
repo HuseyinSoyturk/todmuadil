@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi } from 'vitest';
-import { detectLoginState, activateLoginElement } from '../src/core/login-helper.js';
+import { detectLoginState, activateLoginElement, setupTodLoginCaptchaHandler } from '../src/core/login-helper.js';
 
 describe('login-helper', () => {
   it('detects login form inputs and submit button in priority order', () => {
@@ -64,6 +64,50 @@ describe('login-helper', () => {
       'bc-input-password',
       'bc-btn-login-submit'
     ]);
+  });
+
+  it('intercepts #bc-form-login submit to execute TOD invisible reCAPTCHA (window.captchaManager) before posting', () => {
+    document.body.innerHTML = `
+      <form action="/kullanici/giris" id="bc-form-login" method="post">
+        <input id="bc-input-username" name="User" type="text" value="5551112233" />
+        <input id="bc-input-password" name="Password" type="password" value="secret12" />
+        <button id="bc-btn-login-submit" type="submit">Devam Et</button>
+      </form>
+    `;
+    const form = document.getElementById('bc-form-login');
+    const submitSpy = vi.spyOn(form, 'submit').mockImplementation(() => {});
+
+    let responseCallback = null;
+    window.captchaManager = {
+      EVENTS: { response: 'response' },
+      getResponse: vi.fn(() => ''),
+      on: vi.fn((evt, cb) => {
+        if (evt === 'response') responseCallback = cb;
+      }),
+      off: vi.fn(),
+      addOrUpdateResponseFormInputElement: vi.fn(f => {
+        const input = document.createElement('input');
+        input.id = 'captcha-response';
+        input.name = 'g-recaptcha-response';
+        input.type = 'hidden';
+        input.value = 'test-recaptcha-token';
+        f.appendChild(input);
+      }),
+      execute: vi.fn(() => {
+        if (responseCallback) responseCallback('test-recaptcha-token');
+      })
+    };
+
+    setupTodLoginCaptchaHandler(document);
+    const submitBtn = document.getElementById('bc-btn-login-submit');
+    activateLoginElement(submitBtn);
+
+    expect(window.captchaManager.execute).toHaveBeenCalledTimes(1);
+    expect(window.captchaManager.addOrUpdateResponseFormInputElement).toHaveBeenCalledWith(form);
+    expect(form.querySelector('input[name="g-recaptcha-response"]')?.value).toBe('test-recaptcha-token');
+    expect(submitSpy).toHaveBeenCalledTimes(1);
+
+    delete window.captchaManager;
   });
 });
 
