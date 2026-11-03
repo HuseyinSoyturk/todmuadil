@@ -52,5 +52,19 @@ describe('Xbox UWP & Preview Server artifacts', () => {
       server.close();
     }
   });
+
+  it('includes complete UWP solution files (App.xaml, App.xaml.cs, Default.rd.xml, Assets) and MSBuild AppxBundle step in CI workflow', () => {
+    expect(fs.existsSync(path.resolve('xbox-uwp/App.xaml'))).toBe(true);
+    expect(fs.existsSync(path.resolve('xbox-uwp/App.xaml.cs'))).toBe(true);
+    expect(fs.existsSync(path.resolve('xbox-uwp/Properties/Default.rd.xml'))).toBe(true);
+    expect(fs.existsSync(path.resolve('xbox-uwp/Assets/StoreLogo.png'))).toBe(true);
+    expect(fs.existsSync(path.resolve('xbox-uwp/Assets/Square150x150Logo.png'))).toBe(true);
+    expect(fs.existsSync(path.resolve('xbox-uwp/Assets/Square44x44Logo.png'))).toBe(true);
+
+    const wf = fs.readFileSync(path.resolve('.github/workflows/build-xbox-appx.yml'), 'utf8');
+    expect(wf).toContain('msbuild');
+    expect(wf).toContain('GenerateAppxPackageOnBuild=true');
+    expect(wf).toContain('AppPackages');
+  });
 });
 

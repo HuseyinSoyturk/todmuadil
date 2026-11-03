@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-xbox:
-    runs-on: windows-latest
+    runs-on: windows-2022
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -23,14 +23,29 @@ jobs:
           npm test
           npm run build
 
+      - name: Setup NuGet
+        uses: nuget/setup-nuget@v2
+
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
 
-      - name: Upload Ready Bundle Artifact
+      - name: Restore & Build Xbox UWP AppxBundle
+        shell: pwsh
+        run: |
+          msbuild xbox-uwp/TodXboxApp.csproj `
+            /t:Restore,Build `
+            /p:Configuration=Release `
+            /p:Platform=x64 `
+            /p:AppxBundle=Always `
+            /p:AppxBundlePlatforms="x64" `
+            /p:UapAppxPackageBuildMode=SideloadOnly `
+            /p:AppxPackageSigningEnabled=false `
+            /p:GenerateAppxPackageOnBuild=true
+
+      - name: Upload Xbox AppxBundle Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: tod-xbox-live-bundle
+          name: TodXboxApp-Xbox-Package
           path: |
+            xbox-uwp/AppPackages/**/*
             dist/tod-xbox-live.bundle.js
-            xbox-uwp/
-
