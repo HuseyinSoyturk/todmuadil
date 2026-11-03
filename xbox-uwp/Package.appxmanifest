@@ -6,15 +6,15 @@
   IgnorableNamespaces="uap mp">
 
   <Identity
-    Name="TodXboxLiveApp"
-    Publisher="CN=TodXboxDeveloper"
+    Name="lazhus.TodXboxCanliTV"
+    Publisher="CN=39180ED3-CB8B-4F98-BAE6-68BF6163651D"
     Version="1.0.0.0" />
 
   <mp:PhoneIdentity PhoneProductId="9a8b7c6d-1234-4567-89ab-cdef01234567" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
-    <DisplayName>TOD Xbox Canlı TV</DisplayName>
-    <PublisherDisplayName>TodXboxDeveloper</PublisherDisplayName>
+    <DisplayName>TodXboxCanliTV</DisplayName>
+    <PublisherDisplayName>lazhus</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
 
@@ -32,7 +32,7 @@
       Executable="$targetnametoken$.exe"
       EntryPoint="TodXboxApp.App">
       <uap:VisualElements
-        DisplayName="TOD Xbox Canlı TV"
+        DisplayName="TodXboxCanliTV"
         Square150x150Logo="Assets\Square150x150Logo.png"
         Square44x44Logo="Assets\Square44x44Logo.png"
         Description="TOD Canlı Yayın 65 inç TV ve Xbox Gamepad Uygulaması"

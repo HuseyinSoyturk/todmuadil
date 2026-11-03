@@ -42,9 +42,9 @@ jobs:
         run: |
           $cert = New-SelfSignedCertificate `
             -Type Custom `
-            -Subject "CN=TodXboxDeveloper" `
+            -Subject "CN=39180ED3-CB8B-4F98-BAE6-68BF6163651D" `
             -KeyUsage DigitalSignature `
-            -FriendlyName "TodXboxDeveloper" `
+            -FriendlyName "lazhus" `
             -CertStoreLocation "Cert:\CurrentUser\My" `
             -TextExtension @("2.5.29.37={text}1.3.6.1.5.5.7.3.3", "2.5.29.19={text}")
           Export-Certificate -Cert $cert -FilePath "xbox-uwp/TodXboxApp.cer"
@@ -57,7 +57,7 @@ jobs:
             /p:Platform=x64 `
             /p:AppxBundle=Always `
             /p:AppxBundlePlatforms="x64" `
-            /p:UapAppxPackageBuildMode=SideloadOnly `
+            /p:UapAppxPackageBuildMode=StoreUpload `
             /p:AppxPackageSigningEnabled=true `
             /p:PackageCertificateThumbprint="$($cert.Thumbprint)" `
             /p:GenerateAppxPackageOnBuild=true 2>&1
@@ -71,12 +71,11 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          $files = Get-ChildItem -Path "xbox-uwp/AppPackages" -Recurse -Include *.msixupload,*.appxupload,*.msixbundle,*.appxbundle | Select-Object -ExpandProperty FullName
           gh release delete v0.1.0 --yes 2>$null
-          gh release create v0.1.0 `
-            xbox-uwp/AppPackages/TodXboxApp_1.0.0.0_Test/TodXboxApp_1.0.0.0_x64.msixbundle `
-            xbox-uwp/TodXboxApp.cer `
+          gh release create v0.1.0 $files "xbox-uwp/TodXboxApp.cer" `
             --title "TOD Xbox Live v0.1.0" `
-            --notes "Signed Xbox UWP AppxBundle"
+            --notes "Partner Center StoreUpload (.msixupload) & Xbox Sideload (.msixbundle)"
 
       - name: Upload Xbox AppxBundle Artifact
         uses: actions/upload-artifact@v7
