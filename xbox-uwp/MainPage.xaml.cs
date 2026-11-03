@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Web.WebView2.Core;
-using Windows.Storage;
 using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -17,11 +16,14 @@ namespace TodXboxApp
         {
             this.InitializeComponent();
 
-            // Disable Xbox virtual mouse cursor so D-Pad spatial navigation controls the UI
-            Application.Current.RequiresPointerMode = ApplicationRequiresPointerMode.WhenRequested;
-
-            // Remove Xbox TV overscan borders so 65-inch TV uses full 100% screen area
-            ApplicationView.GetForCurrentView().SetDesiredBoundsMode(ApplicationViewBoundsMode.UseCoreWindow);
+            try
+            {
+                // RequiresPointerMode is configured in App() constructor; disable Xbox TV overscan borders here
+                ApplicationView.GetForCurrentView().SetDesiredBoundsMode(ApplicationViewBoundsMode.UseCoreWindow);
+            }
+            catch
+            {
+            }
 
             this.Loaded += OnMainPageLoaded;
         }
@@ -31,32 +33,108 @@ namespace TodXboxApp
             await InitializeTodWebViewAsync();
         }
 
-        private async Task InitializeTodWebViewAsync()
+        private string LoadBundleScript()
         {
-            // Persist cookies and localStorage under ApplicationData.Current.LocalFolder
-            StorageFolder localFolder = ApplicationData.Current.LocalFolder;
-            Environment.SetEnvironmentVariable("WEBVIEW2_USER_DATA_FOLDER", localFolder.Path);
-
-            await TodWebView.EnsureCoreWebView2Async();
-
-            var settings = TodWebView.CoreWebView2.Settings;
-            settings.AreDefaultContextMenusEnabled = false;
-            settings.AreDevToolsEnabled = false;
-            settings.IsStatusBarEnabled = false;
-
-            string scriptPath = Path.Combine(
-                Windows.ApplicationModel.Package.Current.InstalledLocation.Path,
-                "Assets",
-                "tod-xbox-live.bundle.js"
-            );
-
-            if (File.Exists(scriptPath))
+            try
             {
-                string bundleJs = File.ReadAllText(scriptPath);
-                await TodWebView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(bundleJs);
+                string scriptPath = Path.Combine(
+                    Windows.ApplicationModel.Package.Current.InstalledLocation.Path,
+                    "Assets",
+                    "tod-xbox-live.bundle.js"
+                );
+
+                if (File.Exists(scriptPath))
+                {
+                    return File.ReadAllText(scriptPath);
+                }
+            }
+            catch
+            {
             }
 
-            TodWebView.Source = new Uri(TodLiveTvUrl);
+            return string.Empty;
+        }
+
+        private async Task InitializeTodWebViewAsync()
+        {
+            string bundleJs = LoadBundleScript();
+
+            // 1. Try modern WebView2 first
+            try
+            {
+                var webView2 = new Microsoft.UI.Xaml.Controls.WebView2
+                {
+                    HorizontalAlignment = HorizontalAlignment.Stretch,
+                    VerticalAlignment = VerticalAlignment.Stretch
+                };
+
+                BrowserHost.Children.Clear();
+                BrowserHost.Children.Add(webView2);
+
+                await webView2.EnsureCoreWebView2Async();
+
+                if (webView2.CoreWebView2 != null)
+                {
+                    var settings = webView2.CoreWebView2.Settings;
+                    settings.AreDefaultContextMenusEnabled = false;
+                    settings.AreDevToolsEnabled = false;
+                    settings.IsStatusBarEnabled = false;
+
+                    if (!string.IsNullOrEmpty(bundleJs))
+                    {
+                        await webView2.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(bundleJs);
+                    }
+
+                    webView2.Source = new Uri(TodLiveTvUrl);
+                    return;
+                }
+            }
+            catch
+            {
+                // Fall back to system UWP WebView below if WebView2 runtime is unavailable on Xbox
+            }
+
+            // 2. Guaranteed Xbox OS fallback: System UWP WebView
+            try
+            {
+                BrowserHost.Children.Clear();
+                var legacyWebView = new WebView(WebViewExecutionMode.SeparateProcess)
+                {
+                    HorizontalAlignment = HorizontalAlignment.Stretch,
+                    VerticalAlignment = VerticalAlignment.Stretch
+                };
+
+                if (!string.IsNullOrEmpty(bundleJs))
+                {
+                    legacyWebView.DOMContentLoaded += async (s, args) =>
+                    {
+                        try
+                        {
+                            await legacyWebView.InvokeScriptAsync("eval", new string[] { bundleJs });
+                        }
+                        catch
+                        {
+                        }
+                    };
+
+                    legacyWebView.NavigationCompleted += async (s, args) =>
+                    {
+                        try
+                        {
+                            await legacyWebView.InvokeScriptAsync("eval", new string[] { bundleJs });
+                        }
+                        catch
+                        {
+                        }
+                    };
+                }
+
+                BrowserHost.Children.Add(legacyWebView);
+                legacyWebView.Navigate(new Uri(TodLiveTvUrl));
+            }
+            catch
+            {
+            }
         }
     }
 }

@@ -2,14 +2,7 @@
     x:Class="TodXboxApp.MainPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:controls="using:Microsoft.UI.Xaml.Controls"
     Background="#0c1017">
 
-    <Grid Background="#0c1017">
-        <controls:WebView2
-            x:Name="TodWebView"
-            HorizontalAlignment="Stretch"
-            VerticalAlignment="Stretch" />
-    </Grid>
+    <Grid x:Name="BrowserHost" Background="#0c1017" />
 </Page>
-

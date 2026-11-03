@@ -1,6 +1,7 @@
 using System;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
+using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
@@ -11,12 +12,30 @@ namespace TodXboxApp
     {
         public App()
         {
+            try
+            {
+                // Must be set in App constructor before Window/Page creation on Xbox
+                this.RequiresPointerMode = ApplicationRequiresPointerMode.WhenRequested;
+            }
+            catch
+            {
+            }
+
             this.InitializeComponent();
             this.Suspending += OnSuspending;
+            this.UnhandledException += OnUnhandledException;
         }
 
         protected override void OnLaunched(LaunchActivatedEventArgs e)
         {
+            try
+            {
+                ApplicationViewScaling.TrySetDisableLayoutScaling(true);
+            }
+            catch
+            {
+            }
+
             Frame rootFrame = Window.Current.Content as Frame;
             if (rootFrame == null)
             {
@@ -35,9 +54,14 @@ namespace TodXboxApp
             }
         }
 
+        private void OnUnhandledException(object sender, Windows.UI.Xaml.UnhandledExceptionEventArgs e)
+        {
+            e.Handled = true;
+        }
+
         void OnNavigationFailed(object sender, NavigationFailedEventArgs e)
         {
-            throw new Exception("Failed to load Page " + e.SourcePageType.FullName);
+            e.Handled = true;
         }
 
         private void OnSuspending(object sender, SuspendingEventArgs e)
@@ -47,4 +71,3 @@ namespace TodXboxApp
         }
     }
 }
-
