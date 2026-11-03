@@ -32,7 +32,7 @@ jobs:
       - name: Restore & Build Xbox UWP AppxBundle
         shell: pwsh
         run: |
-          msbuild xbox-uwp/TodXboxApp.csproj `
+          $out = msbuild xbox-uwp/TodXboxApp.csproj `
             /t:Restore,Build `
             /p:Configuration=Release `
             /p:Platform=x64 `
@@ -40,7 +40,11 @@ jobs:
             /p:AppxBundlePlatforms="x64" `
             /p:UapAppxPackageBuildMode=SideloadOnly `
             /p:AppxPackageSigningEnabled=false `
-            /p:GenerateAppxPackageOnBuild=true
+            /p:GenerateAppxPackageOnBuild=true 2>&1
+          $code = $LASTEXITCODE
+          $out | ForEach-Object { Write-Host $_ }
+          $out | Select-String -Pattern "error " | ForEach-Object { Write-Host "::error::$($_.Line)" }
+          if ($code -ne 0) { exit $code }
 
       - name: Upload Xbox AppxBundle Artifact
         uses: actions/upload-artifact@v4

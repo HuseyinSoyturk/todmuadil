@@ -10,7 +10,7 @@ namespace TodXboxApp
 {
     public sealed partial class MainPage : Page
     {
-        private const string TodLiveTvUrl = "https://www.todtv.com.tr/canli-tv";
+        private const string TodLiveTvUrl = "https://www.todtv.com.tr/canli-tv/bein-sports-1?c=spor";
 
         public MainPage()
         {
@@ -51,7 +51,7 @@ namespace TodXboxApp
 
             if (File.Exists(scriptPath))
             {
-                string bundleJs = await File.ReadAllTextAsync(scriptPath);
+                string bundleJs = File.ReadAllText(scriptPath);
                 await TodWebView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(bundleJs);
             }
 
@@ -59,4 +59,3 @@ namespace TodXboxApp
         }
     }
 }
-
