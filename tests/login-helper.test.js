@@ -28,3 +28,4 @@ describe('login-helper', () => {
     expect(clickSpy).toHaveBeenCalled();
   });
 });
+

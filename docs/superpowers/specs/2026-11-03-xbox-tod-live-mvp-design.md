@@ -90,3 +90,4 @@ TodMuadil/
    - Canlı oynatıcı (`live-player.js`): **X** tuşuyla tam ekran geçişinin (hem standart API hem CSS fallback) ve **LB/RB** kanal değiştirmenin doğrulanması.
 2. **Canlı Önizleme Testi:**
    - Önce Mac üzerinde örnek/canlı sayfada klavye veya kol ile test, ardından Xbox üzerinde gerçek kol ve 65 inç TV ile doğrulama.
+

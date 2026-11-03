@@ -33,3 +33,4 @@ jobs:
           path: |
             dist/tod-xbox-live.bundle.js
             xbox-uwp/
+

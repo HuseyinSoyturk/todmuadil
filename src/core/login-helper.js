@@ -52,3 +52,4 @@ export function activateLoginElement(el) {
   }
   return 'clicked';
 }
+

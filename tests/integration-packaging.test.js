@@ -16,3 +16,4 @@ describe('Xbox UWP & Preview Server artifacts', () => {
     expect(manifest).toContain('Windows.Xbox');
   });
 });
+
