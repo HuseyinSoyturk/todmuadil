@@ -5,6 +5,9 @@ on:
     branches: [ main, "feat/**" ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build-xbox:
     runs-on: windows-2022
@@ -34,9 +37,20 @@ jobs:
         run: |
           msbuild xbox-uwp/TodXboxApp.csproj /t:Restore /p:Configuration=Release /p:Platform=x64
 
-      - name: Build Xbox UWP AppxBundle
+      - name: Build & Sign Xbox UWP AppxBundle
         shell: pwsh
         run: |
+          $cert = New-SelfSignedCertificate `
+            -Type Custom `
+            -Subject "CN=TodXboxDeveloper" `
+            -KeyUsage DigitalSignature `
+            -FriendlyName "TodXboxDeveloper" `
+            -CertStoreLocation "Cert:\CurrentUser\My" `
+            -TextExtension @("2.5.29.37={text}1.3.6.1.5.5.7.3.3", "2.5.29.19={text}")
+          Export-Certificate -Cert $cert -FilePath "xbox-uwp/TodXboxApp.cer"
+          Import-Certificate -FilePath "xbox-uwp/TodXboxApp.cer" -CertStoreLocation "Cert:\LocalMachine\Root"
+          Import-Certificate -FilePath "xbox-uwp/TodXboxApp.cer" -CertStoreLocation "Cert:\LocalMachine\TrustedPeople"
+
           $out = msbuild xbox-uwp/TodXboxApp.csproj `
             /t:Build `
             /p:Configuration=Release `
@@ -44,12 +58,25 @@ jobs:
             /p:AppxBundle=Always `
             /p:AppxBundlePlatforms="x64" `
             /p:UapAppxPackageBuildMode=SideloadOnly `
-            /p:AppxPackageSigningEnabled=false `
+            /p:AppxPackageSigningEnabled=true `
+            /p:PackageCertificateThumbprint="$($cert.Thumbprint)" `
             /p:GenerateAppxPackageOnBuild=true 2>&1
           $code = $LASTEXITCODE
           $out | ForEach-Object { Write-Host $_ }
           $out | Select-String -Pattern "error " | ForEach-Object { Write-Host "::error::$($_.Line)" }
           if ($code -ne 0) { exit $code }
+
+      - name: Publish Signed Bundle to GitHub Release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release delete v0.1.0 --yes 2>$null
+          gh release create v0.1.0 `
+            xbox-uwp/AppPackages/TodXboxApp_1.0.0.0_Test/TodXboxApp_1.0.0.0_x64.msixbundle `
+            xbox-uwp/TodXboxApp.cer `
+            --title "TOD Xbox Live v0.1.0" `
+            --notes "Signed Xbox UWP AppxBundle"
 
       - name: Upload Xbox AppxBundle Artifact
         uses: actions/upload-artifact@v4
@@ -57,4 +84,5 @@ jobs:
           name: TodXboxApp-Xbox-Package
           path: |
             xbox-uwp/AppPackages/**/*
+            xbox-uwp/TodXboxApp.cer
             dist/tod-xbox-live.bundle.js
